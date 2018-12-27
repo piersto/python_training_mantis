@@ -2,7 +2,7 @@ from model.project import Project
 
 
 def test_add_project(app):
-    app.session.login()
+    app.session.login('administrator', 'root')
     app.project.open_manage_projects_page()
     old_projects = app.project.get_project_list()
     app.project.add_project()

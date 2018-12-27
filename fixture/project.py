@@ -4,7 +4,6 @@ from model.project import Project
 
 class ProjectHelper:
     from selenium.webdriver.support.select import Select
-    from model.contact import Contact
 
     def __init__(self, app):
         self.app = app
@@ -92,4 +91,50 @@ class ProjectHelper:
             id = cells[0].find_element_by_name("selected[]").get_attribute('value')
             contacts.append(Contact(firstname=firstname, lastname=lastname, id=id))
         return contacts
+
+    def open_manage_projects_page(self):
+        wd = self.app.wd
+        wd.find_element_by_link_text("Manage").click()
+        wd.find_element_by_link_text("Manage Projects").click()
+
+    def get_project_list(self):
+        wd = self.app.wd
+        self.open_manage_projects_page()
+        projects = []
+        for row in wd.find_elements_by_name("row-1"):
+            cells = row.find_elements_by_tag_name('td')
+            name = cells[0].text
+            id = cells[0].find_element_by_name("selected[]").get_attribute('value')
+            contacts.append(Contact(firstname=firstname, lastname=lastname, id=id))
+        return contacts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
