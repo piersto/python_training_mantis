@@ -3,31 +3,40 @@
 from model.project import Project
 
 class ProjectHelper:
+    from selenium.webdriver.support.select import Select
+    from model.contact import Contact
 
     def __init__(self, app):
         self.app = app
 
-    def return_to_groups_page(self):
+    def submit_contact_form(self):
         wd = self.app.wd
-        if not (wd.current_url.endswith("/group.php") and len(wd.find_elements_by_name("new")) > 0):
-            wd.find_element_by_link_text("group page").click()
+        wd.find_element_by_xpath(
+            "(.//*[normalize-space(text()) and normalize-space(.)='Notes:'])[1]/following::input[1]").click()
 
-    def create(self, group):
+    def fill_in_contact_form(self, contact):
         wd = self.app.wd
-        self.open_groups_page()
-        # init group creation
-        wd.find_element_by_name("new").click()
-        self.fill_group_form(group)
-        # submit group creation
-        wd.find_element_by_name("submit").click()
-        self.return_to_groups_page()
-        self.group_cache = None
+        self.open_add_new_contact_page()
+        self.fill_contact_form(contact)
+        self.specify_drop_downs(contact)
+        self.submit_contact_form()
+        self.app.return_on_home_page()
 
-    def fill_group_form(self, group):
+    def specify_drop_downs(self, contact):
         wd = self.app.wd
-        self.change_field_value("group_name", group.name)
-        self.change_field_value("group_header", group.header)
-        self.change_field_value("group_footer", group.footer)
+        self.select_in_drop_down('bday', contact.birthday)
+        self.select_in_drop_down('bmonth', contact.birth_month)
+
+    def select_in_drop_down(self, field_name, text):
+        wd = self.app.wd
+        if text is not None:
+            Select(wd.find_element_by_name(field_name)).select_by_visible_text(text)
+
+    def fill_contact_form(self, contact):
+        wd = self.app.wd
+        self.change_field_value('firstname', contact.firstname)
+        self.change_field_value('middlename', contact.middlename)
+        self.change_field_value('lastname', contact.lastname)
 
     def change_field_value(self, field_name, text):
         wd = self.app.wd
@@ -36,84 +45,51 @@ class ProjectHelper:
             wd.find_element_by_name(field_name).clear()
             wd.find_element_by_name(field_name).send_keys(text)
 
-    def open_groups_page(self):
+    def open_add_new_contact_page(self):
         wd = self.app.wd
-        if not (wd.current_url.endswith("/group.php") and len(wd.find_elements_by_name("new")) > 0):
-            wd.find_element_by_link_text("groups").click()
+        wd.find_element_by_link_text("add new").click()
 
-    def delete_first_group(self):
+    def delete_first_contact(self):
         wd = self.app.wd
-        self.delete_group_by_index(0)
+        self.select_first_contact()
+        wd.find_element_by_xpath("//input[@value='Delete']").click()
+        wd.switch_to.alert.accept()
 
-    def delete_group_by_index(self, index):
+    def select_first_contact(self):
         wd = self.app.wd
-        self.open_groups_page()
-        self.select_group_by_index(index)
-        # submit deletion
-        wd.find_element_by_name("delete").click()
-        self.return_to_groups_page()
-        self.group_cache = None
+        wd.find_element_by_name("selected[]").click()
 
-    def select_first_group(self):
+    def modify_first_contact(self, new_contact_data):
         wd = self.app.wd
-        self.select_group_by_index(0)
-
-    def select_group_by_index(self, index):
-        wd = self.app.wd
-        wd.find_elements_by_name("selected[]")[index].click()
-
-    def modify_first_group(self):
-        wd = self.app.wd
-        self.modify_group_by_index(0)
-
-    def modify_group_by_index(self, index, new_group_data):
-        wd = self.app.wd
-        self.open_groups_page()
-        self.select_group_by_index(index)
-        # open modification form
-        wd.find_element_by_name("edit").click()
-        # fill group form
-        self.fill_group_form(new_group_data)
-        # submit modification
+        self.select_first_contact()
+        # click modification button
+        wd.find_element_by_css_selector("img[alt=\"Edit\"]").click()
+        # specify new data
+        self.fill_contact_form(new_contact_data)
+        self.specify_drop_downs(new_contact_data)
+        # click update button
         wd.find_element_by_name("update").click()
-        self.return_to_groups_page()
-        self.group_cache = None
+        # return to home page
+        self.app.return_on_home_page()
 
     def count(self):
         wd = self.app.wd
-        self.open_groups_page()
+        self.open_home_page()
         return len(wd.find_elements_by_name("selected[]"))
 
-    group_cache = None
+    def open_home_page(self):
+        wd = self.app.wd
+        wd.get("http://localhost/addressbook/")
 
     def get_contact_list(self):
-        if self.contact_cache is None:
-            wd = self.app.wd
-            self.contact_cache = []
-            for element in wd.find_elements_by_name("entry"):
-                cells = element.find_elements_by_tag_name("td")
-                name = cells[0].text
-                status = cells[1].text
-                id = cells[0].find_element_by_name("selected[]").get_attribute("value")
-                enabled = cells[2].text
-                view_status = cells[3].text
-                descripiton = cells[4].text
-                self.contact_cache.append(Contact(lastname=lastname, first_name=first_name, id=id,
-                                                                        all_phones_from_home_page=all_phones,
-                                                                        all_mails_from_home_page=all_mails,
-                                                                        address=address))
-
-    def delete_group_by_id(self, id):
         wd = self.app.wd
-        self.open_groups_page()
-        self.select_group_by_id(id)
-        # submit deletion
-        wd.find_element_by_name("delete").click()
-        self.return_to_groups_page()
-        self.group_cache = None
-
-    def select_group_by_id(self, id):
-        wd = self.app.wd
-        wd.find_element_by_css_selector("input[value='%s']" % id).click()
-
+        self.open_home_page()
+        contacts = []
+        for row in wd.find_elements_by_name("entry"):
+            cells = row.find_elements_by_tag_name('td')
+            firstname = cells[1].text
+            lastname = cells[2].text
+            id = cells[0].find_element_by_name("selected[]").get_attribute('value')
+            contacts.append(Contact(firstname=firstname, lastname=lastname, id=id))
+        return contacts
 
