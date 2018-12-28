@@ -16,7 +16,7 @@ class ProjectHelper:
     def get_project_list(self):
         wd = self.app.wd
         projects = []
-        for row in wd.find_elements_by_name("row-1") or wd.find_elements_by_name("row-2"):
+        for row in wd.find_elements_by_css_selector("tr.row-1, tr.row-2"):
             cells = row.find_elements_by_tag_name('td')
             name = cells[0].text
             #id = cells[0].find_element_by_name("selected[]").get_attribute('value')
