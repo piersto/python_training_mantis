@@ -1,6 +1,3 @@
-from sys import maxsize
-
-
 class Project:
     def __init__(self, name=None, status=None, enabled=None, view_status=None, description=None):
         self.name = name
