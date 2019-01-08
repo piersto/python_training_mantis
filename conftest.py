@@ -33,8 +33,9 @@ def app(request, config):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def corfigure_server(request, config):
+def configure_server(request, config):
     install_server_configuration(config['ftp']['host'], config['ftp']['username'], config['ftp']['password'])
+
     def fin():
         restore_server_configuration(config['ftp']['host'], config['ftp']['username'], config['ftp']['password'])
     request.addfinalizer(fin)
