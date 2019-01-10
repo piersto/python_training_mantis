@@ -9,6 +9,7 @@ from fixture.mail import MailHelper
 
 
 class Application:
+
     def __init__(self, browser, config):
         if browser == "chrome":
             self.wd = webdriver.Chrome()

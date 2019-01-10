@@ -22,7 +22,7 @@ class JamesHelper:
             self.telnet = Telnet(host, port, 5)
             self.read_until('Login id:')
             self.write(username + '\n')
-            self.read_until('Password')
+            self.read_until('Password:')
             self.write(password + '\n')
             self.read_until('Welcome root. HELP for a list of commands')
 
