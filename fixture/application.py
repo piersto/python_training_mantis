@@ -24,7 +24,7 @@ class Application:
         self.project = ProjectHelper(self)
         self.james = JamesHelper(self)
         self.mail = MailHelper(self)
-        self.signup = SignUpHelper
+        self.signup = SignUpHelper(self)
         self.config = config
         self.base_url = config['web']['baseUrl']
 
